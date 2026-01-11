@@ -1,6 +1,11 @@
+import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/regexp
 import gleam/string
+
+pub type Loc {
+  Loc(file: String, row: Int, col: Int)
+}
 
 /// Metadata about how a token was matched.
 /// 
@@ -133,12 +138,23 @@ pub type Lexer(tt) {
 /// - If `source` is empty, returns `Some(#(source, eof))`.
 /// - Otherwise, tries each token function in order and returns the first match.
 /// - If no token matches the current input, returns `None`.
-pub fn next_opt(lexer: Lexer(tt), source: String) -> Option(#(String, tt)) {
+/// Attempt to read the next token from the start of `source`, tracking position.
+/// - If `source` is empty, returns `Some(#(source, loc, eof))`.
+/// - Otherwise, tries each token function in order and returns the first match.
+/// - If no token matches the current input, returns `None`.
+pub fn next_opt(
+  lexer: Lexer(tt),
+  source: String,
+  loc: Loc,
+) -> Option(#(String, Loc, tt)) {
   let Lexer(toks, eof) = lexer
   let trimmed = string.trim_start(source)
+  let trimmed_len = string.length(source) - string.length(trimmed)
+  let skipped = string.slice(source, 0, trimmed_len)
+  let new_loc = advance_loc(loc, skipped)
   case string.is_empty(trimmed) {
-    True -> Some(#(trimmed, eof))
-    False -> try_toks(toks, trimmed, eof)
+    True -> Some(#(trimmed, new_loc, eof))
+    False -> try_toks(toks, trimmed, new_loc, eof)
   }
 }
 
@@ -146,27 +162,59 @@ pub fn next_opt(lexer: Lexer(tt), source: String) -> Option(#(String, tt)) {
 /// - If `source` is empty, returns `#("", eof)`.
 /// - Otherwise, tries each token function in order and returns the first match.
 /// - If no token matches the caurrent input, returns `#("", eof)`.
-pub fn next(lexer: Lexer(tt), source: String) -> #(String, tt) {
-  case next_opt(lexer, source) {
-    Some(#(source, tk)) -> #(source, tk)
-    None -> #("", lexer.eof)
+/// Attempt to read the next token from the start of `source`, tracking position.
+/// - If `source` is empty, returns `#("", loc, eof)`.
+/// - Otherwise, tries each token function in order and returns the first match.
+/// - If no token matches the current input, returns `#("", loc, eof)`.
+pub fn next(lexer: Lexer(tt), source: String, loc: Loc) -> #(String, Loc, tt) {
+  case next_opt(lexer, source, loc) {
+    Some(#(source, loc, tk)) -> #(source, loc, tk)
+    None -> #("", loc, lexer.eof)
   }
 }
 
 fn try_toks(
   toks: List(TokenFn(tt)),
   source: String,
+  loc: Loc,
   eof: tt,
-) -> Option(#(String, tt)) {
+) -> Option(#(String, Loc, tt)) {
   case toks {
     [] -> None
     [f, ..rest] ->
       case f(source, "", fn(_) { eof }) {
         Some(#(remaining, Token(_, constructor, word))) -> {
           let token = constructor(word)
-          Some(#(remaining, token))
+          // let word_loc = loc
+          let new_loc = advance_loc(loc, word)
+          Some(#(remaining, new_loc, token))
         }
-        None -> try_toks(rest, source, eof)
+        None -> try_toks(rest, source, loc, eof)
       }
+  }
+}
+
+/// Advance a Loc by a string, updating row/col for newlines.
+pub fn advance_loc(loc: Loc, text: String) -> Loc {
+  let Loc(file, row, col) = loc
+  let lines = string.split(text, "\n")
+  let n = list.length(lines)
+  case n {
+    0 -> loc
+    1 -> {
+      let first = case list.first(lines) {
+        Ok(s) -> s
+        Error(_) -> ""
+      }
+      Loc(file, row, col + string.length(first))
+    }
+    n if n >= 2 -> {
+      let last = case list.last(lines) {
+        Ok(s) -> s
+        Error(_) -> ""
+      }
+      Loc(file, row + n - 1, string.length(last) + 1)
+    }
+    _ -> loc
   }
 }

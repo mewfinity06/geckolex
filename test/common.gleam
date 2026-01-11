@@ -1,3 +1,5 @@
+import gecko/lexer.{type Loc, Loc}
+
 pub type Token {
   OParen
   CParen
@@ -20,4 +22,8 @@ pub type Token {
   String(String)
 
   Eof
+}
+
+pub fn loc(row, col) -> Loc {
+  Loc("", row, col)
 }
