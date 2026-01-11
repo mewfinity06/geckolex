@@ -1,3 +1,4 @@
+import gleam/int
 import gleam/list
 import gleam/option.{type Option, None, Some}
 import gleam/regexp
@@ -5,6 +6,10 @@ import gleam/string
 
 pub type Loc {
   Loc(file: String, row: Int, col: Int)
+}
+
+pub fn loc_display(loc: Loc) -> String {
+  loc.file <> ":" <> int.to_string(loc.row) <> ":" <> int.to_string(loc.col)
 }
 
 /// Metadata about how a token was matched.
@@ -170,6 +175,22 @@ pub fn next(lexer: Lexer(tt), source: String, loc: Loc) -> #(String, Loc, tt) {
   case next_opt(lexer, source, loc) {
     Some(#(source, loc, tk)) -> #(source, loc, tk)
     None -> #("", loc, lexer.eof)
+  }
+}
+
+pub fn collect(
+  lexer: Lexer(tt),
+  source: String,
+  loc: Loc,
+  list: List(#(Loc, tt)),
+) -> List(#(Loc, tt)) {
+  case next(lexer, source, loc) {
+    #("", loc, eof) if eof == lexer.eof ->
+      list.append(list, [#(loc, lexer.eof)])
+    #(source, loc, tk) -> {
+      let list = list.append(list, [#(loc, tk)])
+      collect(lexer, source, loc, list)
+    }
   }
 }
 

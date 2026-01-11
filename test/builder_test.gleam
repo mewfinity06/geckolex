@@ -1,4 +1,5 @@
 import common.{loc} as c
+import gleam/list
 import gleam/option.{None, Some}
 import gleeunit
 
@@ -133,4 +134,43 @@ pub fn keyword_test() {
   assert t4 == c.Ident("y")
   assert t5 == c.Else
   assert t6 == c.Ident("z")
+}
+
+pub fn multi_line_test() {
+  let lexer = lexer()
+  let source =
+    "super big things
+  oh a newline"
+  let #(source, _loc, t1) = lexer.next(lexer, source, loc(0, 0))
+  let #(source, _loc, t2) = lexer.next(lexer, source, loc(0, 0))
+  let #(source, _loc, t3) = lexer.next(lexer, source, loc(0, 0))
+  let #(source, _loc, t4) = lexer.next(lexer, source, loc(0, 0))
+  let #(source, _loc, t5) = lexer.next(lexer, source, loc(0, 0))
+  let #(source, _loc, t6) = lexer.next(lexer, source, loc(0, 0))
+  assert source == ""
+  assert t1 == c.Ident("super")
+  assert t2 == c.Ident("big")
+  assert t3 == c.Ident("things")
+  assert t4 == c.Ident("oh")
+  assert t5 == c.Ident("a")
+  assert t6 == c.Ident("newline")
+}
+
+pub fn collect_test() {
+  let lexer = lexer()
+  let source =
+    "super big things
+  oh a newline"
+  let tokens =
+    lexer.collect(lexer, source, loc(0, 0), []) |> list.map(fn(tk) { tk.1 })
+  assert tokens
+    == [
+      c.Ident("super"),
+      c.Ident("big"),
+      c.Ident("things"),
+      c.Ident("oh"),
+      c.Ident("a"),
+      c.Ident("newline"),
+      c.Eof,
+    ]
 }
