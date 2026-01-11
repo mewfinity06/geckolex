@@ -53,11 +53,11 @@ pub fn gen_naked(s: String, constructor: fn(String) -> tt) -> TokenFn(tt) {
   fn(input: String, _check: String, _ret: fn(String) -> tt) -> Option(
     #(String, Token(tt)),
   ) {
-    let s_len = string.length(s)
-    let input_len = string.length(input)
-    case s_len <= input_len && string.starts_with(input, s) {
-      True ->
-        Some(#(string.drop_start(input, s_len), Token(Naked, constructor, s)))
+    case string.starts_with(input, s) {
+      True -> {
+        let remaining = string.drop_start(input, string.length(s))
+        Some(#(remaining, Token(Naked, constructor, s)))
+      }
       False -> None
     }
   }
