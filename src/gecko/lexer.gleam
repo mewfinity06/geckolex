@@ -184,13 +184,14 @@ pub fn collect(
   loc: Loc,
   list: List(#(Loc, tt)),
 ) -> List(#(Loc, tt)) {
-  case next(lexer, source, loc) {
-    #("", loc, eof) if eof == lexer.eof ->
+  case next_opt(lexer, source, loc) {
+    Some(#(_source, loc, eof)) if eof == lexer.eof ->
       list.append(list, [#(loc, lexer.eof)])
-    #(source, loc, tk) -> {
+    Some(#(source, loc, tk)) -> {
       let list = list.append(list, [#(loc, tk)])
       collect(lexer, source, loc, list)
     }
+    None -> list.append(list, [#(loc, lexer.eof)])
   }
 }
 
