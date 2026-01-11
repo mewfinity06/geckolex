@@ -2,8 +2,8 @@
 
 A simple lexer library for Gleam supporting literal string matching and basic regex patterns.
 
-[![Package Version](https://img.shields.io/hexpm/v/gecko)](https://hex.pm/packages/gecko)
-[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gecko/)
+[![Package Version](https://img.shields.io/hexpm/v/geckolex)](https://hex.pm/packages/geckolex)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/geckolex/)
 
 ```sh
 gleam add geckolex@1
