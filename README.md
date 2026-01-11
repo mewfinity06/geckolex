@@ -12,7 +12,7 @@ gleam add gecko@1
 ## Quick Start
 
 ```gleam
-import gecko/lexer.{type TokenFn, Lexer, gen_naked, gen_rule}
+import gecko.{type TokenFn, Lexer, gen_naked, gen_rule}
 
 type TokenType {
   OParen // (
@@ -32,8 +32,8 @@ type TokenType {
   Eof
 }
 
-fn token_type() {
-  [
+fn get_lexer() {
+  Lexer([
     gen_naked("...", fn(_) { Elipsis }),
     gen_naked("..", fn(_) { Spread }),
     gen_naked(".", fn(_) { Dot }),
@@ -48,12 +48,14 @@ fn token_type() {
         Error(_) -> Number(0)
       }
     }),
-  ]
+  ], Eof)
 }
 
 pub fn main() -> Nil {
-  let lexer = Lexer(token_type(), Eof)
+  let lexer = get_lexer()
   let source = "hello world"
+  let #(source, t1) = gecko.next(lexer, source)
+  let #(source, t2) = gecko.next(lexer, source)
 }
 
 ```

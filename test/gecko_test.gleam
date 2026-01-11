@@ -2,7 +2,7 @@ import gleam/int
 import gleam/option.{None, Some}
 import gleeunit
 
-import gecko/lexer.{type TokenFn, Lexer, gen_naked, gen_rule}
+import gecko.{Lexer, gen_naked, gen_rule}
 
 pub fn main() -> Nil {
   gleeunit.main()
@@ -50,58 +50,58 @@ fn init_lexer() {
 
 pub fn match_paren_once_test() {
   let lexer = init_lexer()
-  assert lexer.next(lexer, "(") == #("", OParen)
+  assert gecko.next(lexer, "(") == #("", OParen)
 }
 
 pub fn next_paren_test() {
   let lexer = init_lexer()
-  assert lexer.next(lexer, "(") == #("", OParen)
+  assert gecko.next(lexer, "(") == #("", OParen)
 }
 
 pub fn next_empty_is_eof_test() {
   let lexer = init_lexer()
-  assert lexer.next(lexer, "") == #("", Eof)
+  assert gecko.next(lexer, "") == #("", Eof)
 }
 
 pub fn next_unmatched_is_none_test() {
   let lexer = init_lexer()
-  assert lexer.next_opt(lexer, "@") == None
+  assert gecko.next_opt(lexer, "@") == None
 }
 
 pub fn next_identifier_test() {
   let lexer = init_lexer()
-  assert lexer.next_opt(lexer, "hello") == Some(#("", Ident("hello")))
+  assert gecko.next_opt(lexer, "hello") == Some(#("", Ident("hello")))
 }
 
 pub fn next_identifier_with_underscore_test() {
   let lexer = init_lexer()
-  assert lexer.next_opt(lexer, "hello_world123")
+  assert gecko.next_opt(lexer, "hello_world123")
     == Some(#("", Ident("hello_world123")))
 }
 
 pub fn next_number_test() {
   let lexer = init_lexer()
-  assert lexer.next_opt(lexer, "123") == Some(#("", Number(123)))
+  assert gecko.next_opt(lexer, "123") == Some(#("", Number(123)))
 }
 
 pub fn next_number_with_underscore_test() {
   let lexer = init_lexer()
   // Note: int.parse will handle "1_234_567" but the actual parsed value is 1234567
-  assert lexer.next_opt(lexer, "1234567") == Some(#("", Number(1_234_567)))
+  assert gecko.next_opt(lexer, "1234567") == Some(#("", Number(1_234_567)))
 }
 
 pub fn whitespace_is_skipped_test() {
   let lexer = init_lexer()
-  assert lexer.next_opt(lexer, "   hello") == Some(#("", Ident("hello")))
+  assert gecko.next_opt(lexer, "   hello") == Some(#("", Ident("hello")))
 }
 
 pub fn get_many_tokens_test() {
   let lexer = init_lexer()
   let source = "() hello 223"
-  let #(source, t1) = lexer.next(lexer, source)
-  let #(source, t2) = lexer.next(lexer, source)
-  let #(source, t3) = lexer.next(lexer, source)
-  let #(source, t4) = lexer.next(lexer, source)
+  let #(source, t1) = gecko.next(lexer, source)
+  let #(source, t2) = gecko.next(lexer, source)
+  let #(source, t3) = gecko.next(lexer, source)
+  let #(source, t4) = gecko.next(lexer, source)
   assert source == ""
   assert t1 == OParen
   assert t2 == CParen
@@ -112,12 +112,12 @@ pub fn get_many_tokens_test() {
 pub fn same_start_test() {
   let lexer = init_lexer()
   let source = ". .. ... ... . .."
-  let #(source, t1) = lexer.next(lexer, source)
-  let #(source, t2) = lexer.next(lexer, source)
-  let #(source, t3) = lexer.next(lexer, source)
-  let #(source, t4) = lexer.next(lexer, source)
-  let #(source, t5) = lexer.next(lexer, source)
-  let #(source, t6) = lexer.next(lexer, source)
+  let #(source, t1) = gecko.next(lexer, source)
+  let #(source, t2) = gecko.next(lexer, source)
+  let #(source, t3) = gecko.next(lexer, source)
+  let #(source, t4) = gecko.next(lexer, source)
+  let #(source, t5) = gecko.next(lexer, source)
+  let #(source, t6) = gecko.next(lexer, source)
   assert source == ""
   assert t1 == Dot
   assert t2 == Spread
