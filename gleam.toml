@@ -1,4 +1,4 @@
-name = "gecko"
+name = "geckolex"
 version = "1.0.0"
 
 description = "Type Agnostic Lexer"

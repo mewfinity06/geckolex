@@ -6,7 +6,7 @@ A simple lexer library for Gleam supporting literal string matching and basic re
 [![Hex Docs](https://img.shields.io/badge/hex-docs-ffaff3)](https://hexdocs.pm/gecko/)
 
 ```sh
-gleam add gecko@1
+gleam add geckolex@1
 ```
 
 ## Quick Start
